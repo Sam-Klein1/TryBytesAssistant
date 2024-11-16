@@ -185,7 +185,8 @@ async def send_initial_conversation_item(openai_ws):
                     "type": "input_text",
                     "text": "Hello"
                 }
-            ]
+            ],
+            "max_tokens": 20  # Limit initial response to 20 tokens for lower tokens used 
         }
     }
     await openai_ws.send(json.dumps(initial_conversation_item))
@@ -203,7 +204,8 @@ async def initialize_session(openai_ws):
             "voice": VOICE,
             "instructions": SYSTEM_MESSAGE,
             "modalities": ["text", "audio"],
-            "temperature": 0.8,
+            "temperature": 0.3, # Changed this to lower the tokens used, this controls the creativity of the responses
+            "max_tokens": 50    # Limit the length of the responses to lower token used
         }
     }
     print('Sending session update:', json.dumps(session_update))
@@ -216,3 +218,4 @@ async def initialize_session(openai_ws):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=PORT)
+
