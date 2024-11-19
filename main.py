@@ -198,14 +198,13 @@ async def initialize_session(openai_ws):
     session_update = {
         "type": "session.update",
         "session": {
-            "turn_detection": {"type": "server_vad"},
+            "turn_detection": {"type": "server_vad", "threshold": 0.5, "prefix_padding_ms": 300, "silence_duration_ms": 200},
             "input_audio_format": "g711_ulaw",
             "output_audio_format": "g711_ulaw",
             "voice": VOICE,
             "instructions": SYSTEM_MESSAGE,
             "modalities": ["text", "audio"],
-            "temperature": 0.3, # Changed this to lower the tokens used, this controls the creativity of the responses
-            "max_tokens": 50    # Limit the length of the responses to lower token used
+            "temperature": 0.8,  # Adjust creativity
         }
     }
     print('Sending session update:', json.dumps(session_update))
