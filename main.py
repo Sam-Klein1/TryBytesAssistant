@@ -7,6 +7,7 @@ from fastapi import FastAPI, WebSocket, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.websockets import WebSocketDisconnect
 from twilio.twiml.voice_response import VoiceResponse, Connect, Say, Stream
+from twilio.twiml.messaging_response import MessagingResponse
 from dotenv import load_dotenv
 from constants import PORT, SYSTEM_MESSAGE, VOICE, LOG_EVENT_TYPES, SHOW_TIMING_MATH
 
@@ -30,15 +31,27 @@ async def index_page():
 async def handle_incoming_call(request: Request):
     """Handle incoming call and return TwiML response to connect to Media Stream."""
     response = VoiceResponse()
-    # <Say> punctuation to improve text-to-speech flow
-    # response.say("Please wait while we connect your call to the A. I. voice assistant, powered by Twilio and the Open-A.I. Realtime API")
-    # response.pause(length=1)
-    # response.say("O.K. you can start talking!")
     host = request.url.hostname
     connect = Connect()
     connect.stream(url=f'wss://{host}/media-stream')
     response.append(connect)
     return HTMLResponse(content=str(response), media_type="application/xml")
+
+@app.api_route("/incoming-message", methods=["GET", "POST"])
+async def handle_incoming_message(request: Request):
+    form_data = await request.form()
+    message_body = form_data.get('Body')
+    from_number = form_data.get('From')
+    
+    print(f"Received message: {message_body} from {from_number}")
+
+    # Create a Twilio response
+    response = MessagingResponse()
+    response.message(f"Hello, you sent: {message_body} from {from_number}")
+
+    return HTMLResponse(content=str(response), media_type="application/xml")
+
+
 
 
 @app.websocket("/media-stream")
@@ -194,6 +207,13 @@ async def send_initial_conversation_item(openai_ws):
 
 async def initialize_session(openai_ws):
     """Control initial session with OpenAI."""
+    # Read the contents of extracted.txt
+    # with open('extracted.txt', 'r') as file:
+    #     extracted_text = file.read()
+
+    # Append the extracted text to SYSTEM_MESSAGE
+    # updated_system_message = SYSTEM_MESSAGE + "\n" + "this is all the data you need to refer to " + extracted_text
+
     session_update = {
         "type": "session.update",
         "session": {
