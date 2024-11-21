@@ -33,9 +33,9 @@ async def handle_incoming_call(request: Request):
     response = VoiceResponse()
     host = request.url.hostname
 
-    # Add background sound
-    background_sound_url = f"http://{host}:{PORT}/background-sound"
-    response.play(background_sound_url, loop=0, volume=-5) 
+    # # Add background sound
+    # background_sound_url = f"http://{host}:{PORT}/background-sound"
+    # response.play(background_sound_url, loop=0, volume=-5) 
 
     connect = Connect()
     connect.stream(url=f'wss://{host}/media-stream')
@@ -56,10 +56,10 @@ async def handle_incoming_message(request: Request):
 
     return HTMLResponse(content=str(response), media_type="application/xml")
 
-@app.get("/background-sound")
-async def get_background_sound():
-    file_path = "restaurant-background-noise.mp3"  # Update with your local file path
-    return FileResponse(file_path, media_type='audio/mpeg')
+# @app.get("/background-sound")
+# async def get_background_sound():
+#     file_path = "restaurant-background-noise.mp3"  
+#     return FileResponse(file_path, media_type='audio/mpeg')
 
 
 @app.websocket("/media-stream")
@@ -216,11 +216,11 @@ async def send_initial_conversation_item(openai_ws):
 async def initialize_session(openai_ws):
     """Control initial session with OpenAI."""
     # Read the contents of extracted.txt
-    # with open('extracted.txt', 'r') as file:
-    #     extracted_text = file.read()
+    with open('extracted.txt', 'r') as file:
+        extracted_text = file.read()
 
     # Append the extracted text to SYSTEM_MESSAGE
-    # updated_system_message = SYSTEM_MESSAGE + "\n" + "this is all the data you need to refer to " + extracted_text
+    updated_system_message = SYSTEM_MESSAGE + "\n" + "this is all the data you need to refer to " + extracted_text
 
     session_update = {
         "type": "session.update",
