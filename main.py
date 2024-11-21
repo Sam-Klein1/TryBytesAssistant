@@ -4,7 +4,7 @@ import base64
 import asyncio
 import websockets
 from fastapi import FastAPI, WebSocket, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.websockets import WebSocketDisconnect
 from twilio.twiml.voice_response import VoiceResponse, Connect, Say, Stream
 from twilio.twiml.messaging_response import MessagingResponse
@@ -32,6 +32,11 @@ async def handle_incoming_call(request: Request):
     """Handle incoming call and return TwiML response to connect to Media Stream."""
     response = VoiceResponse()
     host = request.url.hostname
+
+    # Add background sound
+    background_sound_url = f"http://{host}:{PORT}/background-sound"
+    response.play(background_sound_url, loop=0, volume=-5) 
+
     connect = Connect()
     connect.stream(url=f'wss://{host}/media-stream')
     response.append(connect)
@@ -51,7 +56,10 @@ async def handle_incoming_message(request: Request):
 
     return HTMLResponse(content=str(response), media_type="application/xml")
 
-
+@app.get("/background-sound")
+async def get_background_sound():
+    file_path = "restaurant-background-noise.mp3"  # Update with your local file path
+    return FileResponse(file_path, media_type='audio/mpeg')
 
 
 @app.websocket("/media-stream")
